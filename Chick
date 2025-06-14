@@ -5,6 +5,8 @@ local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 
 -- Configuration
+local __PELINDA_SERVICE__ = SapiHub 
+local __PELINDA_SILENTMODE__ = true
 local KeyFile = "SapiHub.txt"
 local SaveKey = true
 local __PELINDA_SECURITY_LEVEL__ = 1
@@ -163,8 +165,8 @@ end
 -- Function to initiate validation
 local function validateWithPelinda(key)
     local status = Pelinda.Init({
-        Service = SapiHub,
-        SilentMode = true,
+        Service = __PELINDA_SERVICE__,
+        SilentMode = __PELINDA_SILENTMODE__,
         Key = key,
         SecurityLevel = __PELINDA_SECURITY_LEVEL__
     })
@@ -201,7 +203,7 @@ end)
 -- Event: Getkey button pressed - copy key link to clipboard
 Getkey.MouseButton1Down:Connect(function()
     local success, err = pcall(function()
-        local keyLink = Pelinda.GetKeyLink({ Service = SapiHub })
+        local keyLink = Pelinda.GetKeyLink({ Service = __PELINDA_SERVICE__ })
         setclipboard(keyLink)
         displayMessage("Key link copied to clipboard!", 4)
     end)
