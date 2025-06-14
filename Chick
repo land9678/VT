@@ -5,10 +5,10 @@ local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 
 -- Configuration
-local __PELINDA_SERVICE__ = SapiHub 
-local __PELINDA_SILENTMODE__ = true
-local KeyFile = "SapiHub.txt"
-local SaveKey = true
+local __PELINDA_SERVICE__ = SapiHub,
+local __PELINDA_SILENTMODE__ = true,
+local KeyFile = "SapiHub.txt",
+local SaveKey = true,
 local __PELINDA_SECURITY_LEVEL__ = 1
 
 -- Services for UI
@@ -204,11 +204,16 @@ end)
 Getkey.MouseButton1Down:Connect(function()
     local success, err = pcall(function()
         local keyLink = Pelinda.GetKeyLink({ Service = __PELINDA_SERVICE__ })
-        setclipboard(keyLink)
-        displayMessage("Key link copied to clipboard!", 4)
+        if keyLink then
+            setclipboard(keyLink)
+            displayMessage("Key link copied to clipboard!", 4)
+        else
+            error("Key link is nil.")
+        end
     end)
     if not success then
         displayMessage("Failed to copy key link: " .. tostring(err), 5)
+        print("Error details: " .. tostring(err))  -- Log error details for debugging
     end
 end)
 
