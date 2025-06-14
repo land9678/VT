@@ -1,7 +1,8 @@
 local KeyFile = "SapiHub.txt"
 local SaveKey = true
 local __PELINDA_SECURITY_LEVEL__ = 1 
-local SapiHub = "SapiHub"
+local __PELINDA_SERVICE__ = "SapiHub"
+local __PELINDA_SILENTMODE__ = true
 
 -- GUI Setup
 local Players = game:GetService("Players")
@@ -111,8 +112,8 @@ Checkkey.MouseButton1Down:Connect(function()
     local userKey = TextBox.Text
     if userKey and userKey ~= "" then
         local status = Pelinda.Init({
-            Service = SapiHub,
-            SilentMode = true,
+            Service = __PELINDA_SERVICE__,
+            SilentMode = __PELINDA_SILENTMODE__,
             Key = userKey,
             SecurityLevel = __PELINDA_SECURITY_LEVEL__
         })
@@ -137,7 +138,7 @@ Checkkey.MouseButton1Down:Connect(function()
 end)
 
 Getkey.MouseButton1Down:Connect(function()
-    setclipboard(Pelinda.GetKeyLink({ Service = SapiHub }))
+    setclipboard(Pelinda.GetKeyLink({ Service = __PELINDA_SERVICE__ }))
     print("Key link copied to your clipboard!")
 end)
 
