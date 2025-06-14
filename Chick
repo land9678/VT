@@ -1,43 +1,31 @@
-local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local player = Players.LocalPlayer
-
--- Configuration
-local __PELINDA_SERVICE__ = SapiHub
-local __PELINDA_SILENTMODE__ = true
 local KeyFile = "SapiHub.txt"
 local SaveKey = true
-local __PELINDA_SECURITY_LEVEL__ = 1
+local __PELINDA_SECURITY_LEVEL__ = 1 
+local SapiHub = "SapiHub"
 
--- Services for UI
-local UserInputService = game:GetService("UserInputService")
+-- GUI Setup
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
 
--- Create Blur Effect
-local function addBlur()
-    if not Lighting:FindFirstChild("KeySystemBlur") then
-        local blur = Instance.new("BlurEffect")
-        blur.Size = 25
-        blur.Name = "KeySystemBlur"
-        blur.Parent = Lighting
-    end
-end
-
-local function removeBlur()
-    local blur = Lighting:FindFirstChild("KeySystemBlur")
-    if blur then
-        blur:Destroy()
-    end
-end
-
--- Create UI Elements
+local player = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KeySystemScreenGui"
-ScreenGui.ResetOnSpawn = false
+local Frame = Instance.new("ImageLabel")
+local title = Instance.new("TextLabel")
+local Getkey = Instance.new("TextButton")
+local Checkkey = Instance.new("TextButton")
+local TextBox = Instance.new("TextBox")
+local TextLabel = Instance.new("TextLabel")
+
+-- Blur Effect
+local blur = Instance.new("BlurEffect")
+blur.Size = 25
+blur.Name = "KeySystemBlur"
+blur.Parent = Lighting
+
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local Frame = Instance.new("ImageLabel")
-Frame.Name = "MainFrame"
+Frame.Parent = ScreenGui
 Frame.BackgroundColor3 = Color3.fromRGB(76, 76, 76)
 Frame.BackgroundTransparency = 1
 Frame.ImageTransparency = 0
@@ -46,10 +34,7 @@ Frame.Position = UDim2.new(0.5, -140, 0.5, -90)
 Frame.Size = UDim2.new(0, 280, 0, 180)
 Frame.ScaleType = Enum.ScaleType.Crop
 Frame.SliceCenter = Rect.new(30, 30, 300, 300)
-Frame.Parent = ScreenGui
 
-local title = Instance.new("TextLabel")
-title.Name = "Title"
 title.Parent = Frame
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 5)
@@ -59,7 +44,6 @@ title.BackgroundTransparency = 1
 title.Font = Enum.Font.Garamond
 title.TextSize = 20
 
-local Getkey = Instance.new("TextButton")
 Getkey.Name = "Getkey"
 Getkey.Parent = Frame
 Getkey.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
@@ -70,7 +54,6 @@ Getkey.Text = "Get Link"
 Getkey.TextColor3 = Color3.fromRGB(255, 255, 255)
 Getkey.TextSize = 16
 
-local Checkkey = Instance.new("TextButton")
 Checkkey.Name = "Checkkey"
 Checkkey.Parent = Frame
 Checkkey.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
@@ -81,8 +64,6 @@ Checkkey.Text = "Submit"
 Checkkey.TextColor3 = Color3.fromRGB(255, 255, 255)
 Checkkey.TextSize = 16
 
-local TextBox = Instance.new("TextBox")
-TextBox.Name = "KeyInputBox"
 TextBox.Parent = Frame
 TextBox.Size = UDim2.new(0.85, 0, 0, 30)
 TextBox.Position = UDim2.new(0.075, 0, 0, 45)
@@ -95,8 +76,6 @@ TextBox.BackgroundTransparency = 0.3
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.BorderSizePixel = 1
 
-local TextLabel = Instance.new("TextLabel")
-TextLabel.Name = "FeedbackLabel"
 TextLabel.Parent = Frame
 TextLabel.BackgroundTransparency = 1
 TextLabel.Position = UDim2.new(0.075, 0, 0, 125)
@@ -107,7 +86,6 @@ TextLabel.TextColor3 = Color3.fromRGB(128, 64, 0)
 TextLabel.TextSize = 14
 TextLabel.TextWrapped = true
 
--- Helper for UI corner rounding
 local function addUICorner(obj)
     local uic = Instance.new("UICorner")
     uic.CornerRadius = UDim.new(0, 12)
@@ -119,118 +97,51 @@ addUICorner(Getkey)
 addUICorner(Checkkey)
 addUICorner(TextBox)
 
--- Show blur effect when GUI is shown
-addBlur()
-
--- Function to remove GUI and blur after success
 local function removeUI()
-    if ScreenGui and ScreenGui.Parent then
-        ScreenGui:Destroy()
-    end
-    removeBlur()
+    ScreenGui:Destroy()
+    local existingBlur = Lighting:FindFirstChild("KeySystemBlur")
+    if existingBlur then existingBlur:Destroy() end
 end
 
--- Function to display transient messages on the TextLabel
-local function displayMessage(message, duration)
-    TextLabel.Text = message
-    if duration then
-        delay(duration, function()
-            if TextLabel then
-                TextLabel.Text = ""
-            end
-        end)
-    end
-end
-
--- Loads the saved key from file if available
-local function loadKey()
-    if SaveKey and isfile(KeyFile) then
-        local savedKey = readfile(KeyFile)
-        if savedKey and savedKey ~= "" then
-            TextBox.Text = savedKey
-            displayMessage("Successfully loaded key!", 5)
-        end
-    end
-end
-
--- Saves the given key to file
-local function saveKey(key)
-    if SaveKey then
-        writefile(KeyFile, key)
-    end
-end
-
--- Function to initiate validation
-local function validateWithPelinda(key)
-    local status = Pelinda.Init({
-        Service = __PELINDA_SERVICE__,
-        SilentMode = __PELINDA_SILENTMODE__,
-        Key = key,
-        SecurityLevel = __PELINDA_SECURITY_LEVEL__
-    })
-
-    print("[+] PandaV3 Status: " .. tostring(status))
-
-    if status == "validated!!" then
-        displayMessage("Key validated! Loading...", 3)
-        saveKey(key)
-        removeUI()
-        -- Load main script after success
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/land9678/VT/refs/heads/main/Vampire.lua"))()
-    else
-        displayMessage("Key invalid or failed: " .. status, 5)
-    end
-end
-
--- Event: TextBox text change to reflect in feedback label
 TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-    TextLabel.Text = ""
+    TextLabel.Text = TextBox.Text
 end)
 
--- Event: Checkkey button pressed - submit key for validation
 Checkkey.MouseButton1Down:Connect(function()
-    local inputKey = TextBox.Text and TextBox.Text:match("%S")
-    if inputKey and inputKey ~= "" then
-        displayMessage("Validating key...", nil)
-        validateWithPelinda(inputKey)
-    else
-        displayMessage("Please enter a key", 3)
-    end
-end)
+    local userKey = TextBox.Text
+    if userKey and userKey ~= "" then
+        local status = Pelinda.Init({
+            Service = SapiHub,
+            SilentMode = true,
+            Key = userKey,
+            SecurityLevel = __PELINDA_SECURITY_LEVEL__
+        })
 
--- Event: Getkey button pressed - copy key link to clipboard
-Getkey.MouseButton1Down:Connect(function()
-    local success, err = pcall(function()
-        local keyLink = Pelinda.GetKeyLink({ Service = __PELINDA_SERVICE__ })
-        if keyLink then
-            setclipboard(keyLink)
-            displayMessage("Key link copied to clipboard!", 4)
+        print("[+] PandaV3 Status: " .. status)
+
+        if status == "validated!!" then
+            print("PandaV3 Loaded Successfully!")
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/land9678/VT/refs/heads/main/Vampire.lua"))()
+            removeUI()
         else
-            error("Key link is nil.")
+            TextLabel.Text = "Key is invalid"
         end
-    end)
-    if not success then
-        displayMessage("Failed to copy key link: " .. tostring(err), 5)
-        print("Error details: " .. tostring(err))  -- Log error details for debugging
+
+        if SaveKey then
+            writefile(KeyFile, userKey)
+            TextLabel.Text = "Key saved successfully!"
+        end
+    else
+        TextLabel.Text = "Please enter a key."
     end
 end)
 
--- Load saved key if any on startup
-loadKey()
-
--- Optional: Prevent GUI removal via keyboard (anti tampering)
-ScreenGui.DescendantRemoving:Connect(function(child)
-    if child == Frame then
-        displayMessage("Key System - GUI tampering detected! Reloading...", 5)
-        removeUI()
-        -- Optionally kick player or re-show GUI here for more anti tampering
-    end
+Getkey.MouseButton1Down:Connect(function()
+    setclipboard(Pelinda.GetKeyLink({ Service = SapiHub }))
+    print("Key link copied to your clipboard!")
 end)
 
--- Ensure no other scripts can disable the GUI easily (basic anti tamper)
-ScreenGui:GetPropertyChangedSignal("Enabled"):Connect(function()
-    if not ScreenGui.Enabled then
-        displayMessage("GUI disabled detected! Resetting...", 5)
-        ScreenGui.Enabled = true
-    end
-end)
+if SaveKey and isfile(KeyFile) then
+    TextBox.Text = readfile(KeyFile)
+    TextLabel.Text = "Successfully loaded key!"
+end
