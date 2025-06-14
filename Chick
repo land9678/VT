@@ -1,5 +1,3 @@
--- KeySystem GUI and Validation Script for Roblox
-
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
