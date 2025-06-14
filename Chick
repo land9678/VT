@@ -1,7 +1,7 @@
 local KeyFile = "SapiHub.txt"
 local SaveKey = true
 local __PELINDA_SECURITY_LEVEL__ = 1 
-local __PELINDA_SERVICE__ = SapiHub
+local __PELINDA_SERVICE__ = sapihub
 local __PELINDA_SILENTMODE__ = true
 
 -- GUI Setup
