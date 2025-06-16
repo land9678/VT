@@ -48,7 +48,7 @@ local function autoUseKey()
 				timeLabel.Text = string.format(" %02dh %02dm %02ds", h, m, s)
 				wait(1)
 			end
-			timeLabel.Text = "Key Expired"
+			timeLabel.Text = "Key Expired"
 			wait(3)
 			timeGui.Enabled = false
 		end)
@@ -147,7 +147,7 @@ copy.TextColor3 = Color3.fromRGB(255, 255, 255)
 copy.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
 
 copy.MouseButton1Click:Connect(function()
-	setclipboard("https://link-center.net/1357423/Dp9ovJh6OwR9")
+	setclipboard("https://direct-link.net/1357423/5kbyTDqOshjS")
 	copy.Text = "Copied!"
 	wait(2)
 	copy.Text = "Copy Key"
