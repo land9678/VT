@@ -1,0 +1,258 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local canSave = isfile and writefile and readfile
+local saveFile = "lastkey.json"
+local savedKey, expiresAt
+
+local function formatTime(ms)
+	local seconds = math.floor(ms / 1000)
+	return DateTime.fromUnixTimestamp(seconds):FormatUniversalTime("LLL d, yyyy HH:mm", "en-us")
+end
+
+local function countdownString(ms)
+	local total = math.floor((ms - DateTime.now().UnixTimestampMillis) / 1000)
+	if total <= 0 then return "Expired" end
+	local h = math.floor(total / 3600)
+	local m = math.floor((total % 3600) / 60)
+	local s = total % 60
+	return string.format("%02dh %02dm %02ds", h, m, s)
+end
+
+local function loadSavedKey()
+	if canSave and isfile(saveFile) then
+		local ok, data = pcall(function()
+			return HttpService:JSONDecode(readfile(saveFile))
+		end)
+		if ok and data and data.key and data.expiresAfter then
+			savedKey = data.key
+			expiresAt = data.expiresAfter
+		end
+	elseif _G.LastKey then
+		savedKey = _G.LastKey
+	end
+end
+
+local function autoUseKey()
+	if not savedKey or not expiresAt then return false end
+	local now = DateTime.now().UnixTimestampMillis
+	if now < expiresAt then
+		timeGui.Enabled = true
+		task.spawn(function()
+			while DateTime.now().UnixTimestampMillis < expiresAt do
+				local total = math.floor((expiresAt - DateTime.now().UnixTimestampMillis) / 1000)
+				local h = math.floor(total / 3600)
+				local m = math.floor((total % 3600) / 60)
+				local s = total % 60
+				timeLabel.Text = string.format(" %02dh %02dm %02ds", h, m, s)
+				wait(1)
+			end
+			timeLabel.Text = "Key Expired"
+			wait(3)
+			timeGui.Enabled = false
+		end)
+
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/land9678/VT/refs/heads/main/Vampire.lua"))()
+		return true
+	end
+	return false
+end
+
+-- UI setup
+local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+gui.Name = "KeySystemUI"
+
+-- Create time-shower UI (top-right corner)
+local timeGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+timeGui.Name = "TimeDisplayUI"
+timeGui.ResetOnSpawn = false
+timeGui.Enabled = false 
+
+local timeLabel = Instance.new("TextLabel", timeGui)
+timeLabel.Size = UDim2.new(0, 100, 0, 30)
+timeLabel.Position = UDim2.new(1, -5, 0, 5) 
+timeLabel.AnchorPoint = Vector2.new(1, 1) 
+timeLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+timeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+timeLabel.Font = Enum.Font.Garamond
+timeLabel.TextSize = 16
+timeLabel.Text = ""
+timeLabel.TextXAlignment = Enum.TextXAlignment.Center
+timeLabel.BorderSizePixel = 0
+timeLabel.BackgroundTransparency = 0.8
+
+-- Main UI Holder
+local gui = Instance.new("ScreenGui")
+gui.Name = "KeySystemUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 12 -- blur intensity
+blur.Parent = game:GetService("Lighting")
+
+-- MOBILE OPTIMIZED UI FRAME
+local frame = Instance.new("ImageLabel", gui)
+frame.Size = UDim2.new(0, 280, 0, 180) -- smaller size for mobile
+frame.Position = UDim2.new(0.5, -140, 0.6, -90)
+frame.BackgroundTransparency = 1
+frame.ImageTransparency = 0 
+frame.Image = "rbxassetid://76926193047725" 
+frame.ScaleType = Enum.ScaleType.Crop
+frame.SliceCenter = Rect.new(30, 30, 300, 300)
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 5)
+title.Text = "Enter Key"
+title.TextColor3 = Color3.fromRGB(60, 40, 20)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.Garamond
+title.TextSize = 20
+
+-- Textbox
+local textbox = Instance.new("TextBox", frame)
+textbox.Size = UDim2.new(0.85, 0, 0, 30)
+textbox.Position = UDim2.new(0.075, 0, 0, 45)
+textbox.PlaceholderText = "Paste your key..."
+textbox.Text = ""
+textbox.Font = Enum.Font.Garamond
+textbox.TextSize = 16
+textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textbox.BackgroundTransparency = 0.7
+textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textbox.BorderSizePixel = 1
+
+-- Submit Button
+local submit = Instance.new("TextButton", frame)
+submit.Size = UDim2.new(0.4, -5, 0, 28)
+submit.Position = UDim2.new(0.075, 0, 0, 85)
+submit.Text = "Submit"
+submit.Font = Enum.Font.Garamond
+submit.TextSize = 16
+submit.TextColor3 = Color3.fromRGB(255, 255, 255)
+submit.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
+
+-- Copy Button
+local copy = Instance.new("TextButton", frame)
+copy.Size = UDim2.new(0.4, -5, 0, 28)
+copy.Position = UDim2.new(0.525, 10, 0, 85)
+copy.Text = "Copy Key"
+copy.Font = Enum.Font.Garamond
+copy.TextSize = 16
+copy.TextColor3 = Color3.fromRGB(255, 255, 255)
+copy.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
+
+copy.MouseButton1Click:Connect(function()
+	setclipboard("https://link-center.net/1357423/Dp9ovJh6OwR9")
+	copy.Text = "Copied!"
+	wait(2)
+	copy.Text = "Copy Key"
+end)
+
+-- Status Text
+local status = Instance.new("TextLabel", frame)
+status.Size = UDim2.new(0.85, 0, 0, 25)
+status.Position = UDim2.new(0.075, 0, 0, 125)
+status.Text = ""
+status.Font = Enum.Font.Garamond
+status.TextSize = 14
+status.TextColor3 = Color3.fromRGB(128, 64, 0)
+status.BackgroundTransparency = 1
+status.TextWrapped = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", textbox)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", submit)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", copy)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", textbox)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", submit)
+corner.CornerRadius = UDim.new(0, 12)
+
+local corner = Instance.new("UICorner", timeLabel)
+corner.CornerRadius = UDim.new(0, 12)
+
+-- Main check
+local function checkKey(inputKey)
+	status.Text = "Checking..."
+
+	local ok, response = pcall(function()
+		return game:HttpGet("https://work.ink/_api/v2/token/isValid/" .. inputKey)
+	end)
+
+	if not ok then
+		status.Text = "(×_×) Failed to check key"
+		return
+	end
+
+	local data = HttpService:JSONDecode(response)
+	if not data.valid then
+		status.Text = "×_× Invalid Key"
+		return
+	end
+
+	local exp = data.info.expiresAfter
+	local readable = formatTime(exp)
+	local countdownLeft = function()
+		return countdownString(exp)
+	end
+
+	-- Save key
+	if canSave then
+		writefile(saveFile, HttpService:JSONEncode({
+			key = inputKey,
+			expiresAfter = exp
+		}))
+	else
+		_G.LastKey = inputKey
+	end
+
+	timeGui.Enabled = true
+	gui:Destroy()
+	blur:Destroy()
+
+	task.spawn(function()
+		while DateTime.now().UnixTimestampMillis < exp do
+			timeLabel.Text = " " .. countdownLeft()
+			wait(1)
+		end
+		timeLabel.Text = "Key Expired"
+		wait(3)
+		timeGui.Enabled = false
+	end)
+
+	-- Load your actual script here
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/land9678/VT/refs/heads/main/Vampire.lua"))()
+end
+
+--  Connect submit button ONCE
+submit.MouseButton1Click:Connect(function()
+	if textbox.Text ~= "" then
+		checkKey(textbox.Text)
+	else
+		status.Text = "Please enter a key"
+	end
+end)
+
+-- Attempt auto-login if key valid
+loadSavedKey()
+if savedKey and expiresAt and autoUseKey() then
+	gui:Destroy()
+	blur:Destroy()
+end
