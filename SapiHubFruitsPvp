@@ -1,0 +1,51 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local aimlockModuleURL = "https://raw.githubusercontent.com/jakasnaam-web/cutebee/refs/heads/main/GigaBoy"
+local success1, AimlockModule = pcall(function()
+    return loadstring(game:HttpGet(aimlockModuleURL))()
+end)
+if not success1 then
+    warn("Failed to load AimlockModule:", AimlockModule)
+    return
+end
+
+local uiModuleURL = "https://raw.githubusercontent.com/jakasnaam-web/cutebee/refs/heads/main/OtaBoy"
+local success2, AimlockUI = pcall(function()
+    return loadstring(game:HttpGet(uiModuleURL))()
+end)
+if not success2 then
+    warn("Failed to load AimlockUI:", AimlockUI)
+    return
+end
+
+local uiController = AimlockUI.Init(player, AimlockModule)
+
+local playerGui = player:WaitForChild("PlayerGui")
+local oldToggle = playerGui:FindFirstChild("ToggleGui")
+if oldToggle then oldToggle:Destroy() end
+
+local toggleGui = Instance.new("ScreenGui")
+toggleGui.Name = "ToggleGui"
+toggleGui.Parent = playerGui
+
+local toggleButton = Instance.new("ImageButton")
+toggleButton.Name = "SHV1"
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0, 5, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.BackgroundTransparency = 0.2
+toggleButton.BorderSizePixel = 0
+toggleButton.ZIndex = 9999
+toggleButton.Image = "rbxassetid://76926193047725"
+toggleButton.Parent = toggleGui
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 8)
+toggleCorner.Parent = toggleButton
+
+local isOpen = false
+toggleButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    uiController.Toggle(isOpen)
+end)
