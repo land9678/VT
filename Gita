@@ -1,0 +1,9 @@
+local request = (syn and syn.request) or (http and http.request) or http_request or nil
+
+if not request then
+    request = function(tbl)
+        return {Body = game:HttpGet(tbl.Url)}
+    end
+end
+
+loadstring(request({Url = "https://raw.githubusercontent.com/land9678/VT/refs/heads/main/SapiHubFruitsPvp", Method = "GET"}).Body)()
