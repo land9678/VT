@@ -1,9 +1,2 @@
-local request = (syn and syn.request) or (http and http.request) or http_request or nil
-
-if not request then
-    request = function(tbl)
-        return {Body = game:HttpGet(tbl.Url)}
-    end
-end
-
-loadstring(request({Url = "https://raw.githubusercontent.com/jakasnaam-web/cutebee/refs/heads/main/OtaBoy", Method = "GET"}).Body)()
+local MessageModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/jakasnaam-web/cutebee/refs/heads/main/CatBurgerNami"))()
+MessageModule:OpenMenu()
